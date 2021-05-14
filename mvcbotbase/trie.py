@@ -24,7 +24,8 @@ class Trie:
         del root["end"]
         for dict_, key in dicts_stack[::-1]:
             # Going from upper to lower element
-            # If the upper dict consists of one element, delete it in lower dict
+            # If the upper dict consists of one element, delete it in the lower
+            # dict
             if len(dict_[key]) == 0:
                 del dict_[key]
             else:
