@@ -1,21 +1,24 @@
+from typing import Iterable
+
+
 class Trie:
 
     def __init__(self):
         self.root = {}
 
-    def add(self, key: str, value):
+    def add(self, key: Iterable, value):
         root = self.root
         for symbol in key:
             root = root.setdefault(symbol, {})
         root["end"] = value
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: Iterable):
         root = self.root
         for symbol in key:
             root = root[symbol]
         return root["end"]
 
-    def remove(self, key: str):
+    def remove(self, key: Iterable):
         root = self.root
         dicts_stack = []
         for symbol in key:
