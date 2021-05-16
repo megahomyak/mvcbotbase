@@ -3,6 +3,7 @@ import functools
 import re
 from typing import Callable, Awaitable, Optional, List
 
+from classes_for_command_arguments import BaseArg
 from command_info import CommandInfo
 from message_classes import IncomingMessage, OutgoingMessage
 from social_network_provider import SocialNetworkProvider
@@ -35,7 +36,7 @@ class MVCBotBase:
         self.bad_command_arguments_handler = bad_command_arguments_handler
         self.handler_errors_handler = handler_errors_handler
 
-    def add_command(self, name, arguments: list = None, handler=None):
+    def add_command(self, name, arguments: List[BaseArg] = None, handler=None):
         """
         Works as a decorator if handler isn't specified
         """
