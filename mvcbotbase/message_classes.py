@@ -15,6 +15,7 @@ class AttachmentType(Enum):
 
 @dataclass
 class IncomingAttachment:
+    type: AttachmentType
 
     @abstractmethod
     async def download(self, path=None) -> Optional[BytesIO]:
