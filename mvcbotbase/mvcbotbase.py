@@ -80,7 +80,9 @@ class MVCBotBase:
                     await social_network_provider.send_message(answer)
                 elif answer is not None:
                     await social_network_provider.send_message(
-                        OutgoingMessage(text=str(answer))
+                        OutgoingMessage(
+                            peer_id=incoming_message.peer_id, text=str(answer)
+                        )
                     )
             else:
                 if self.bad_command_arguments_handler:

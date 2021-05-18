@@ -27,10 +27,10 @@ class IncomingAttachment:
 
 @dataclass
 class IncomingMessage(ABC):
+    peer_id: int
     id: Optional[int] = None
     text: Optional[str] = None
     sender_id: Optional[int] = None
-    peer_id: Optional[int] = None
     sticker_id: Optional[int] = None
     attachments: Optional[List[IncomingAttachment]] = None
 
@@ -49,9 +49,9 @@ class IncomingMessage(ABC):
 
 @dataclass
 class OutgoingMessage(ABC):
+    peer_id: int
     text: Optional[str] = None
     answer_to_message_id: Optional[int] = None
-    peer_id: Optional[int] = None
     sticker_id: Optional[int] = None
     forwarded_messages_ids: Optional[Iterable[int]] = None
 
