@@ -18,7 +18,7 @@ class IncomingAttachment:
     type: AttachmentType
 
     @abstractmethod
-    async def download(self, path=None) -> Optional[BytesIO]:
+    async def download(self, path=None) -> Optional[bytes]:
         """
         Should return BytesIO if path is not specified
         """
