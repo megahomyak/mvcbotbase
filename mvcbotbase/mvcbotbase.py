@@ -1,16 +1,24 @@
 import asyncio
 import functools
 import re
-from typing import Callable, Awaitable, Optional, List
+from typing import Callable, Awaitable, Optional, List, Dict, Union
 
+import helpers
 from classes_for_command_arguments import BaseArg
 from command_info import CommandInfo
 from message_classes import IncomingMessage, OutgoingMessage
 from social_network_provider import SocialNetworkProvider
 from trie import Trie
 
+CommandsGroupName = str
+SingleCommandHelpMessage = str
+
 
 class MVCBotBase:
+    """
+    The difference between this class and others is in the language of the help
+    message
+    """
 
     def __init__(
             self, social_network_providers: List[SocialNetworkProvider],
@@ -25,7 +33,8 @@ class MVCBotBase:
             ) = None,
             handler_errors_handler: (
                 Optional[Callable[[CommandInfo, asyncio.Future], Awaitable]]
-            ) = None):
+            ) = None,
+            help_message_title="Bot's commands"):
         self.social_network_providers = social_network_providers
         self.trie = Trie()
         self.command_arguments_separator = command_arguments_separator
@@ -35,21 +44,97 @@ class MVCBotBase:
         self.unknown_command_handler = unknown_command_handler
         self.bad_command_arguments_handler = bad_command_arguments_handler
         self.handler_errors_handler = handler_errors_handler
+        self.command_groups: (
+            Dict[CommandsGroupName, List[SingleCommandHelpMessage]]
+        ) = {}
+        self.ungrouped_command_help_messages: (
+            List[SingleCommandHelpMessage]
+        ) = []
+        self.help_message = None
+        self.help_message_title = help_message_title
 
-    def add_command(self, name, arguments: List[BaseArg] = None, handler=None):
+    # noinspection PyMethodMayBeStatic
+    # Because maybe in future I will use `self`
+    def make_help_message_for_command(
+            self, names, arguments, description) -> str:
+        additional_names = ", ".join([
+            f"или {name}" for name in names[1:]
+        ]) if len(names) > 1 else ""
+        arguments = [f"[{arg.name}]" for arg in arguments]
+        return " ".join(filter(None, [
+            f"/{names[0]}", f"({additional_names})", *arguments,
+            f" - {description}" if description else ""
+        ]))
+
+    def _make_full_help_message(self) -> str:
+        """
+        WARNING!!! Do NOT use this function to make a help message! It is used
+        in library to generate the help message ONCE at launch! Generated help
+        message is stored in .help_message field of your instance of MVCBotBase.
+        If you wanna update help message (for example, you added/removed a
+        command in runtime), call .update_message()
+        """
+        help_message_for_grouped_commands = "\n\n".join(
+            f"• {group_name}:\n{helpers.enumerate_and_join_strings(commands)}"
+            for group_name, commands in self.command_groups
+        )
+        return "• {}:\n\n{}".format(
+            self.help_message_title,
+            "\n\n".join(
+                [
+                    help_message_for_grouped_commands,
+                    helpers.enumerate_and_join_strings(
+                        self.ungrouped_command_help_messages
+                    )
+                ]
+                if self.ungrouped_command_help_messages else
+                [help_message_for_grouped_commands]
+            )
+        )
+
+    def add_command(
+            self, name_or_names: Union[str, List[str]],
+            arguments: List[BaseArg] = None, description=None, group_name=None,
+            include_in_help_message=True, handler=None):
         """
         Works as a decorator if handler isn't specified
+
+        group_name is used for help message (it's a command group name)
         """
         if handler:
-            self.trie.add(name, CommandInfo(
+            if isinstance(name_or_names, str):
+                name_or_names = [name_or_names]
+            name_for_regex = "|".join(name_or_names)
+            command_info = CommandInfo(
                 regex=re.compile(self.command_arguments_separator.join(
-                    (name, *(argument.regex for argument in arguments))
+                    (
+                        name_for_regex,
+                        *(argument.regex for argument in arguments)
+                    )
                 )),
                 handler=handler,
                 converters=[argument.get_value for argument in arguments]
-            ))
+            )
+            for name in name_or_names:
+                self.trie.add(name, command_info)
+            if include_in_help_message:
+                help_message = self.make_help_message_for_command(
+                    name_or_names, arguments, description
+                )
+                if group_name:
+                    self.command_groups.setdefault(group_name, []).append(
+                        help_message
+                    )
+                else:
+                    self.ungrouped_command_help_messages.append(help_message)
         else:
-            return functools.partial(self.add_command, name, arguments)
+            return functools.partial(
+                self.add_command, name_or_names, arguments, description,
+                group_name
+            )
+
+    def update_help_message(self) -> None:
+        self.help_message = self._make_full_help_message()
 
     async def run_command_from_message(
             self, incoming_message, social_network_provider):
@@ -107,6 +192,7 @@ class MVCBotBase:
                 ).add_done_callback(self.handler_errors_handler)
 
     async def async_run(self):
+        self.update_help_message()
         for social_network_provider in self.social_network_providers:
             asyncio.create_task(
                 self._run_social_network_provider(social_network_provider)
