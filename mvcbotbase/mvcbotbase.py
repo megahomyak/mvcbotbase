@@ -187,8 +187,15 @@ class MVCBotBase:
                         command_name_length, incoming_message, command_info
                     )
 
-    def run(self):
-        asyncio.run(self.async_run())
+    def run(self, loop: Optional[asyncio.AbstractEventLoop] = None):
+        if not loop:
+            loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.gather(
+            *[
+                self._run_social_network_provider(social_network_provider)
+                for social_network_provider in self.social_network_providers
+            ]
+        ))
 
     async def _run_social_network_provider(self, social_network_provider):
         async for message in social_network_provider.get_messages():
@@ -202,10 +209,3 @@ class MVCBotBase:
                         message, social_network_provider
                     )
                 ).add_done_callback(self.handler_errors_handler)
-
-    async def async_run(self):
-        self.update_help_message()
-        for social_network_provider in self.social_network_providers:
-            asyncio.create_task(
-                self._run_social_network_provider(social_network_provider)
-            )
