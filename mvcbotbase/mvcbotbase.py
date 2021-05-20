@@ -21,7 +21,9 @@ class MVCBotBase:
     """
 
     def __init__(
-            self, social_network_providers: List[SocialNetworkProvider],
+            self, social_network_providers: (
+                Union[List[SocialNetworkProvider], SocialNetworkProvider]
+            ),
             command_arguments_separator=" ",
             unknown_command_handler: (
                 Optional[Callable[[int, IncomingMessage], Awaitable]]
@@ -35,6 +37,8 @@ class MVCBotBase:
                 Optional[Callable[[CommandInfo, asyncio.Future], Awaitable]]
             ) = None,
             help_message_title="Bot's commands"):
+        if isinstance(social_network_providers, SocialNetworkProvider):
+            social_network_providers = [social_network_providers]
         self.social_network_providers = social_network_providers
         self.trie = Trie()
         self.command_arguments_separator = command_arguments_separator
