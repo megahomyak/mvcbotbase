@@ -35,10 +35,6 @@ class IncomingMessage(ABC):
     attachments: Optional[List[IncomingAttachment]] = None
 
     @abstractmethod
-    def as_json(self):
-        pass
-
-    @abstractmethod
     async def get_reply_message(self):
         pass
 
