@@ -1,7 +1,7 @@
 import asyncio
 import functools
 import re
-from typing import Callable, Awaitable, Optional, List, Dict, Union
+from typing import Callable, Awaitable, Optional, List, Dict, Union, Iterable
 
 import helpers
 from classes_for_command_arguments import BaseArg
@@ -132,6 +132,14 @@ class MVCBotBase:
                 self.add_command, name_or_names, arguments, description,
                 group_name
             )
+
+    def remove_command(
+            self, name_or_names: Union[str, Iterable[str]]):
+        if isinstance(name_or_names, str):
+            self.trie.remove(name_or_names)
+        else:
+            for name in name_or_names:
+                self.trie.remove(name)
 
     def update_help_message(self) -> None:
         self.help_message = self._make_full_help_message()
