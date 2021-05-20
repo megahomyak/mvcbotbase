@@ -1,10 +1,10 @@
 import re
-from collections import Callable, Coroutine
 from dataclasses import dataclass
+from typing import Callable, Coroutine
 
 
 @dataclass
 class CommandInfo:
     regex: re.Pattern
     converters: list
-    handler: Callable[Coroutine]
+    handler: Callable[..., Coroutine]
