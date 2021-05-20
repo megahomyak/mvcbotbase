@@ -3,12 +3,12 @@ import functools
 import re
 from typing import Callable, Awaitable, Optional, List, Dict, Union, Iterable
 
-import helpers
-from classes_for_command_arguments import BaseArg
-from command_info import CommandInfo
-from message_classes import IncomingMessage, OutgoingMessage
-from social_network_provider import SocialNetworkProvider
-from trie import Trie
+from mvcbotbase import helpers
+from mvcbotbase.classes_for_command_arguments import BaseArg
+from mvcbotbase.command_info import CommandInfo
+from mvcbotbase.message_classes import IncomingMessage, OutgoingMessage
+from mvcbotbase.social_network_provider import SocialNetworkProvider
+from mvcbotbase.trie import Trie
 
 CommandsGroupName = str
 SingleCommandHelpMessage = str

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import AsyncGenerator
 
-from message_classes import IncomingMessage, OutgoingMessage
+from mvcbotbase.message_classes import IncomingMessage, OutgoingMessage
 
 
 class SocialNetworkProvider(ABC):
