@@ -6,8 +6,8 @@ import aiohttp
 from simple_avk import SimpleAVK
 
 from mvcbotbase import (
-    SocialNetworkProvider, OutgoingMessage, IncomingMessage,
-    IncomingAttachment, AttachmentType
+    SocialNetworkProvider, OutgoingMessage, AbstractIncomingMessage,
+    AbstractIncomingAttachment, AttachmentType
 )
 
 # WARNING!!!
@@ -28,7 +28,7 @@ class ContentCantBeDownloadedError(Exception):
 
 
 @dataclass
-class DownloadableVKAttachment(IncomingAttachment):
+class DownloadableVKAttachment(AbstractIncomingAttachment):
     link: str
     aiohttp_session: aiohttp.ClientSession
 
@@ -45,14 +45,14 @@ class DownloadableVKAttachment(IncomingAttachment):
             return await response.read()
 
 
-class UndownloadableVKAttachment(IncomingAttachment):
+class UndownloadableVKAttachment(AbstractIncomingAttachment):
 
     async def download(self, path=None) -> Optional[bytes]:
         raise ContentCantBeDownloadedError()
 
 
 @dataclass
-class PhotoVKAttachment(IncomingAttachment):
+class PhotoVKAttachment(AbstractIncomingAttachment):
     sizes: list
     aiohttp_session: aiohttp.ClientSession
 
@@ -95,7 +95,9 @@ class VKProvider(SocialNetworkProvider):
 
     # noinspection PyShadowingNames
     # Just for one lambda
-    async def get_messages(self) -> AsyncGenerator[IncomingMessage, None]:
+    async def get_messages(self) -> AsyncGenerator[
+            AbstractIncomingMessage, None
+    ]:
         async with aiohttp.ClientSession() as aiohttp_session:
             vk = SimpleAVK(aiohttp_session, self._token, self._group_id)
             self._vk = vk
@@ -125,7 +127,7 @@ class VKProvider(SocialNetworkProvider):
                             )(attachment, aiohttp_session)
                             for attachment in message["attachments"]
                         ]
-                    yield IncomingMessage(
+                    yield AbstractIncomingMessage(
                         id=message["id"], text=message["text"],
                         sender_id=message["from_id"],
                         peer_id=message["peer_id"], sticker_id=sticker_id,

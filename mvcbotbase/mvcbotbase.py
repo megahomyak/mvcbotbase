@@ -6,7 +6,7 @@ from typing import Callable, Awaitable, Optional, List, Dict, Union, Iterable
 from mvcbotbase import helpers
 from mvcbotbase.classes_for_command_arguments import BaseArg
 from mvcbotbase.command_info import CommandInfo
-from mvcbotbase.message_classes import IncomingMessage, OutgoingMessage
+from mvcbotbase.message_classes import AbstractIncomingMessage, OutgoingMessage
 from mvcbotbase.social_network_provider import SocialNetworkProvider
 from mvcbotbase.trie import Trie
 
@@ -26,12 +26,12 @@ class MVCBotBase:
             ),
             command_arguments_separator=" ",
             unknown_command_handler: (
-                Optional[Callable[[int, IncomingMessage], Awaitable]]
+                Optional[Callable[[int, AbstractIncomingMessage], Awaitable]]
             ) = None,
             bad_command_arguments_handler: (
-                Optional[
-                    Callable[[int, IncomingMessage, CommandInfo], Awaitable]
-                ]
+                Optional[Callable[
+                    [int, AbstractIncomingMessage, CommandInfo], Awaitable
+                ]]
             ) = None,
             handler_errors_handler: (
                 Optional[Callable[[CommandInfo, asyncio.Future], Awaitable]]

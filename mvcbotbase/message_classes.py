@@ -14,8 +14,11 @@ class AttachmentType(Enum):
 
 
 @dataclass
-class IncomingAttachment:
+class Attachment:
     type: AttachmentType
+
+
+class AbstractIncomingAttachment(Attachment, ABC):
 
     @abstractmethod
     async def download(self, path=None) -> Optional[bytes]:
@@ -26,31 +29,33 @@ class IncomingAttachment:
 
 
 @dataclass
-class IncomingMessage(ABC):
+class OutgoingAttachment(Attachment):
+    file: BytesIO
+
+
+@dataclass
+class AbstractIncomingMessage(ABC):
     peer_id: int
     id: Optional[int] = None
     text: Optional[str] = None
     sender_id: Optional[int] = None
     sticker_id: Optional[int] = None
-    attachments: Optional[List[IncomingAttachment]] = None
+    attachments: Optional[List[AbstractIncomingAttachment]] = None
 
     @abstractmethod
-    async def get_reply_message(self):
+    async def get_reply_message(self) -> List["AbstractIncomingMessage"]:
         pass
 
     @abstractmethod
-    async def get_forwarded_messages(self):
+    async def get_forwarded_messages(self) -> List["AbstractIncomingMessage"]:
         pass
 
 
 @dataclass
-class OutgoingMessage(ABC):
+class OutgoingMessage:
     peer_id: int
     text: Optional[str] = None
     answer_to_message_id: Optional[int] = None
     sticker_id: Optional[int] = None
     forwarded_messages_ids: Optional[Iterable[int]] = None
-
-    @abstractmethod
-    async def add_attachment(self, attachment: BytesIO):
-        pass
+    attachments: Optional[List[OutgoingAttachment]] = None
