@@ -105,7 +105,7 @@ class VKProvider(SocialNetworkProvider):
                 if event["type"] == "message_new":
                     message = event["object"]["message"]
                     if (
-                        len(message["attachments"])
+                        message["attachments"]
                         and message["attachments"]["type"] == "sticker"
                     ):
                         # We're dealing with a sticker. Sticker is an attachment
