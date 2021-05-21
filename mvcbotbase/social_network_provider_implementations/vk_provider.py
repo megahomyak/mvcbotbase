@@ -1,6 +1,6 @@
 import random
 from dataclasses import dataclass
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional, List, Tuple
 
 import aiohttp
 from simple_avk import SimpleAVK
@@ -82,6 +82,81 @@ attachment_type_generators_lookup_dict = {
 }
 
 
+@dataclass
+class IncomingVKMessage(AbstractIncomingMessage):
+    _reply_message: Optional["IncomingVKMessage"] = None
+    _forwarded_messages: Optional[List["IncomingVKMessage"]] = None
+
+    async def get_reply_message(self) -> AbstractIncomingMessage:
+        return self._reply_message
+
+    async def get_forwarded_messages(self) -> List[AbstractIncomingMessage]:
+        return self._forwarded_messages
+
+
+StickerID = Optional[int]
+
+
+# noinspection PyShadowingNames
+# for aiohttp_session
+def get_attachments_from_message_info(
+        message_info: dict, aiohttp_session
+) -> Tuple[StickerID, Optional[List[AbstractIncomingAttachment]]]:
+    if (
+        message_info["attachments"]
+        and message_info["attachments"]["type"] == "sticker"
+    ):
+        # We're dealing with a sticker. Sticker is an attachment
+        # in VK API, but not in my library.
+        sticker_id: int = (
+            message_info["attachments"][0]["sticker"]["sticker_id"]
+        )
+        return sticker_id, None
+    else:
+        attachments = [
+            attachment_type_generators_lookup_dict.get(
+                attachment["type"], (
+                    lambda attachment_info, aiohttp_session:
+                    UndownloadableVKAttachment(
+                        AttachmentType.OTHER
+                    )
+                )  # Oh shit
+            )(attachment, aiohttp_session)
+            for attachment in message_info["attachments"]
+        ]
+        return None, attachments
+
+
+def get_message_from_message_info(
+        message_info: dict, aiohttp_session) -> IncomingVKMessage:
+    sticker_id, attachments = get_attachments_from_message_info(
+        message_info, aiohttp_session
+    )
+    reply_message = message_info.get("reply_message")
+    if reply_message:
+        sticker_id, attachments = get_attachments_from_message_info(
+            message_info, aiohttp_session
+        )
+        reply_message = IncomingVKMessage(
+            id=reply_message["id"], text=reply_message["text"],
+            peer_id=reply_message["peer_id"],
+            sticker_id=sticker_id,
+            sender_id=reply_message["from_id"],
+            attachments=attachments
+        )
+    forwarded_messages = [
+        get_message_from_message_info(forwarded_message_info, aiohttp_session)
+        for forwarded_message_info in message_info["fwd_messages"]
+    ]
+    yield IncomingVKMessage(
+        id=message_info["id"], text=message_info["text"],
+        sender_id=message_info["from_id"],
+        peer_id=message_info["peer_id"], sticker_id=sticker_id,
+        attachments=attachments, _reply_message=reply_message,
+        _forwarded_messages=forwarded_messages
+    )
+
+
 class VKProvider(SocialNetworkProvider):
 
     def __init__(self, token: str, group_id: int = None):
@@ -92,42 +167,15 @@ class VKProvider(SocialNetworkProvider):
     # noinspection PyShadowingNames
     # Just for one lambda
     async def get_messages(self) -> AsyncGenerator[
-            AbstractIncomingMessage, None
+            IncomingVKMessage, None
     ]:
         async with aiohttp.ClientSession() as aiohttp_session:
             vk = SimpleAVK(aiohttp_session, self._token, self._group_id)
             self._vk = vk
             async for event in vk.listen():
                 if event["type"] == "message_new":
-                    message = event["object"]["message"]
-                    if (
-                        message["attachments"]
-                        and message["attachments"]["type"] == "sticker"
-                    ):
-                        # We're dealing with a sticker. Sticker is an attachment
-                        # in VK API, but not in my library.
-                        sticker_id = (
-                            message["attachments"][0]["sticker"]["sticker_id"]
-                        )
-                        attachments = []
-                    else:
-                        sticker_id = None
-                        attachments = [
-                            attachment_type_generators_lookup_dict.get(
-                                attachment["type"], (
-                                    lambda attachment_info, aiohttp_session:
-                                    UndownloadableVKAttachment(
-                                        AttachmentType.OTHER
-                                    )
-                                )  # Oh shit
-                            )(attachment, aiohttp_session)
-                            for attachment in message["attachments"]
-                        ]
-                    yield AbstractIncomingMessage(
-                        id=message["id"], text=message["text"],
-                        sender_id=message["from_id"],
-                        peer_id=message["peer_id"], sticker_id=sticker_id,
-                        attachments=attachments
+                    yield get_message_from_message_info(
+                        event["object"]["message"], aiohttp_session
                     )
 
     async def send_message(self, message: OutgoingMessage):
