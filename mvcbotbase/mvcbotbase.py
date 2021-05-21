@@ -155,9 +155,9 @@ class MVCBotBase:
         )
         try:
             command_info = self.trie[
-                incoming_message.text[:command_name_length]
-                if command_name_length == -1 else
                 incoming_message.text
+                if command_name_length == -1 else
+                incoming_message.text[:command_name_length]
             ]
         except KeyError:
             if self.unknown_command_handler:
