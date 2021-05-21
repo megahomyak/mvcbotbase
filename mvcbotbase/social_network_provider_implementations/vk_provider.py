@@ -7,7 +7,7 @@ from simple_avk import SimpleAVK
 
 from mvcbotbase import (
     SocialNetworkProvider, OutgoingMessage, AbstractIncomingMessage,
-    AbstractIncomingAttachment, AttachmentType
+    AbstractIncomingAttachment, AttachmentType, ContentCantBeDownloadedError
 )
 
 # WARNING!!!
@@ -21,10 +21,6 @@ DEFAULT_CHUNK_SIZE = 1024
 SYMBOLS_PER_MESSAGE = 4096
 
 MAX_RES_PHOTO_TYPE = "y"  # Don't ask. This is VK territory
-
-
-class ContentCantBeDownloadedError(Exception):
-    pass
 
 
 @dataclass

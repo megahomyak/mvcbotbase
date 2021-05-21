@@ -18,12 +18,18 @@ class Attachment:
     type: AttachmentType
 
 
+class ContentCantBeDownloadedError(Exception):
+    pass
+
+
 class AbstractIncomingAttachment(Attachment, ABC):
 
     @abstractmethod
     async def download(self, path=None) -> Optional[bytes]:
         """
-        Should return BytesIO if path is not specified
+        Should return BytesIO if path is not specified,
+        should raise ContentCantBeDownloadedError if attachment is not
+        downloadable
         """
         pass
 
