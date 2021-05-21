@@ -134,7 +134,7 @@ class MVCBotBase:
         else:
             return functools.partial(
                 self.add_command, name_or_names, arguments, description,
-                group_name
+                group_name, include_in_help_message
             )
 
     def remove_command(
