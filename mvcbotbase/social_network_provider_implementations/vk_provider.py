@@ -148,7 +148,7 @@ def get_message_from_message_info(
         get_message_from_message_info(forwarded_message_info, aiohttp_session)
         for forwarded_message_info in message_info["fwd_messages"]
     ]
-    yield IncomingVKMessage(
+    return IncomingVKMessage(
         id=message_info["id"], text=message_info["text"],
         sender_id=message_info["from_id"],
         peer_id=message_info["peer_id"], sticker_id=sticker_id,

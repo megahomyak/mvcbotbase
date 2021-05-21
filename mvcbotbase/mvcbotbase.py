@@ -202,10 +202,10 @@ class MVCBotBase:
             if self.handler_errors_handler:
                 asyncio.create_task(self.run_command_from_message(
                     message, social_network_provider)
-                )
+                ).add_done_callback(self.handler_errors_handler)
             else:
                 asyncio.create_task(
                     self.run_command_from_message(
                         message, social_network_provider
                     )
-                ).add_done_callback(self.handler_errors_handler)
+                )
