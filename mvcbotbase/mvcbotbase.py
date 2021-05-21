@@ -110,7 +110,7 @@ class MVCBotBase:
                 name_or_names = [name_or_names]
             command_info = CommandInfo(
                 regex=re.compile(self.command_arguments_separator.join(
-                    argument.regex for argument in arguments
+                    f"({argument.regex})" for argument in arguments
                 )),
                 handler=handler,
                 converters=[argument.get_value for argument in arguments]
