@@ -101,7 +101,7 @@ StickerID = Optional[int]
 # for aiohttp_session
 def get_attachments_from_message_info(
         message_info: dict, aiohttp_session
-) -> Tuple[StickerID, Optional[List[AbstractIncomingAttachment]]]:
+) -> Tuple[StickerID, List[AbstractIncomingAttachment]]:
     if (
         message_info["attachments"]
         and message_info["attachments"]["type"] == "sticker"
@@ -111,7 +111,7 @@ def get_attachments_from_message_info(
         sticker_id: int = (
             message_info["attachments"][0]["sticker"]["sticker_id"]
         )
-        return sticker_id, None
+        return sticker_id, []
     else:
         attachments = [
             attachment_type_generators_lookup_dict.get(
