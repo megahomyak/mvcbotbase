@@ -49,7 +49,7 @@ class AbstractIncomingMessage(ABC):
     attachments: Optional[List[AbstractIncomingAttachment]] = None
 
     @abstractmethod
-    async def get_reply_message(self) -> List["AbstractIncomingMessage"]:
+    async def get_reply_message(self) -> "AbstractIncomingMessage":
         pass
 
     @abstractmethod
