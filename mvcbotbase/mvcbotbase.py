@@ -108,13 +108,9 @@ class MVCBotBase:
         if handler:
             if isinstance(name_or_names, str):
                 name_or_names = [name_or_names]
-            name_for_regex = "|".join(name_or_names)
             command_info = CommandInfo(
                 regex=re.compile(self.command_arguments_separator.join(
-                    (
-                        name_for_regex,
-                        *(argument.regex for argument in arguments)
-                    )
+                    argument.regex for argument in arguments
                 )),
                 handler=handler,
                 converters=[argument.get_value for argument in arguments]
@@ -153,19 +149,23 @@ class MVCBotBase:
         command_name_length = incoming_message.text.find(
             self.command_arguments_separator
         )
-        try:
-            command_info = self.trie[
-                incoming_message.text
-                if command_name_length == -1 else
-                incoming_message.text[:command_name_length]
+        if command_name_length == -1:
+            command_name = incoming_message.text
+            arguments_str = ""
+        else:
+            command_name = incoming_message.text[:command_name_length]
+            arguments_str = incoming_message.text[
+                command_name_length + self.command_arguments_separator_length:
             ]
+        try:
+            command_info = self.trie[command_name]
         except KeyError:
             if self.unknown_command_handler:
                 await self.unknown_command_handler(
                     command_name_length, incoming_message
                 )
         else:
-            argument_texts = command_info.regex.fullmatch(incoming_message.text)
+            argument_texts = command_info.regex.fullmatch(arguments_str)
             if argument_texts:
                 answer = await command_info.handler(incoming_message, *(
                     converter(argument_text)
