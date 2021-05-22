@@ -34,6 +34,12 @@ class AbstractIncomingAttachment(Attachment, ABC):
         pass
 
 
+class UndownloadableAttachment(AbstractIncomingAttachment):
+
+    async def download(self, path=None) -> Optional[bytes]:
+        raise ContentCantBeDownloadedError()
+
+
 @dataclass
 class OutgoingAttachment(Attachment):
     file: BytesIO

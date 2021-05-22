@@ -4,7 +4,7 @@ from mvcbotbase.classes_for_command_arguments import (
 from mvcbotbase.message_classes import (
     AbstractIncomingMessage, OutgoingMessage, AttachmentType,
     AbstractIncomingAttachment, OutgoingAttachment, Attachment,
-    ContentCantBeDownloadedError
+    ContentCantBeDownloadedError, UndownloadableAttachment
 )
 from mvcbotbase.mvcbotbase import MVCBotBase
 from mvcbotbase.social_network_provider import SocialNetworkProvider

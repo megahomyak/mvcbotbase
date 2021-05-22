@@ -7,7 +7,7 @@ from simple_avk import SimpleAVK
 
 from mvcbotbase import (
     SocialNetworkProvider, OutgoingMessage, AbstractIncomingMessage,
-    AbstractIncomingAttachment, AttachmentType, ContentCantBeDownloadedError
+    AbstractIncomingAttachment, AttachmentType, UndownloadableAttachment
 )
 
 # WARNING!!!
@@ -41,12 +41,6 @@ class DownloadableVKAttachment(AbstractIncomingAttachment):
             return await response.read()
 
 
-class UndownloadableVKAttachment(AbstractIncomingAttachment):
-
-    async def download(self, path=None) -> Optional[bytes]:
-        raise ContentCantBeDownloadedError()
-
-
 @dataclass
 class PhotoVKAttachment(AbstractIncomingAttachment):
     sizes: list
@@ -62,10 +56,10 @@ class PhotoVKAttachment(AbstractIncomingAttachment):
 
 attachment_type_generators_lookup_dict = {
     "audio": lambda attachment_info, aiohttp_session: (
-        UndownloadableVKAttachment(AttachmentType.AUDIO)
+        UndownloadableAttachment(AttachmentType.AUDIO)
     ),
     "video": lambda attachment_info, aiohttp_session: (
-        UndownloadableVKAttachment(AttachmentType.VIDEO)
+        UndownloadableAttachment(AttachmentType.VIDEO)
     ),
     "photo": lambda attachment_info, aiohttp_session: (
         PhotoVKAttachment(
@@ -117,9 +111,7 @@ def get_attachments_from_message_info(
             attachment_type_generators_lookup_dict.get(
                 attachment["type"], (
                     lambda attachment_info, aiohttp_session:
-                    UndownloadableVKAttachment(
-                        AttachmentType.OTHER
-                    )
+                    UndownloadableAttachment(AttachmentType.OTHER)
                 )  # Oh shit
             )(attachment, aiohttp_session)
             for attachment in message_info["attachments"]
