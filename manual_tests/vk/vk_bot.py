@@ -1,8 +1,7 @@
 import json
 
 from mvcbotbase import (
-    MVCBotBase, WordArg, AbstractIncomingMessage, IntArg,
-    OutgoingMessage
+    MVCBotBase, WordArg, AbstractIncomingMessage, IntArg
 )
 from mvcbotbase.social_network_provider_implementations.vk_provider import (
     VKProvider
@@ -24,14 +23,12 @@ async def test_handler(
 
 @mvc_bot_base.add_command("test2")
 async def test_forwarded_messages(message):
-    return OutgoingMessage(message.peer_id, forwarded_messages_ids=[message.id])
+    return message.make_answer(forwarded_messages_ids=[message.id])
 
 
 @mvc_bot_base.add_command("test3")
 async def test_reply(message):
-    return OutgoingMessage(
-        message.peer_id, "abc", reply_to_message_id=message.id
-    )
+    return message.make_reply("abc")
 
 
 @mvc_bot_base.add_command("help")
