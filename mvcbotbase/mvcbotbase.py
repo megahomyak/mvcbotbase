@@ -80,7 +80,7 @@ class MVCBotBase:
         """
         help_message_for_grouped_commands = "\n\n".join(
             f"• {group_name}:\n{helpers.enumerate_and_join_strings(commands)}"
-            for group_name, commands in self.command_groups
+            for group_name, commands in self.command_groups.items()
         )
         return "• {}:\n\n{}".format(
             self.help_message_title,
