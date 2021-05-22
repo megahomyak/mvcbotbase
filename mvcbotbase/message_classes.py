@@ -61,7 +61,7 @@ class AbstractIncomingMessage(ABC):
 class OutgoingMessage:
     peer_id: int
     text: Optional[str] = None
-    answer_to_message_id: Optional[int] = None
+    reply_to_message_id: Optional[int] = None
     sticker_id: Optional[int] = None
     forwarded_messages_ids: Optional[Iterable[int]] = None
     attachments: Optional[List[OutgoingAttachment]] = None

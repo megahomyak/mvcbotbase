@@ -201,8 +201,8 @@ class VKProvider(SocialNetworkProvider):
                         params["forward_messages"] = ",".join(
                             map(str, message.forwarded_messages_ids)
                         )
-                    if messages_counter == 1 and message.answer_to_message_id:
-                        params["reply_to"] = message.answer_to_message_id
+                    if messages_counter == 1 and message.reply_to_message_id:
+                        params["reply_to"] = message.reply_to_message_id
                     params["message"] = current_message
                     await self._vk.call_method("messages.send", params)
                     del params["message"]
@@ -218,6 +218,6 @@ class VKProvider(SocialNetworkProvider):
                 params["forward_messages"] = ",".join(
                     map(str, message.forwarded_messages_ids)
                 )
-            if message.answer_to_message_id:
-                params["reply_to"] = message.answer_to_message_id
+            if message.reply_to_message_id:
+                params["reply_to"] = message.reply_to_message_id
             await self._vk.call_method("messages.send", params)
