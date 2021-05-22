@@ -40,6 +40,16 @@ class OutgoingAttachment(Attachment):
 
 
 @dataclass
+class OutgoingMessage:
+    peer_id: int
+    text: Optional[str] = None
+    reply_to_message_id: Optional[int] = None
+    sticker_id: Optional[int] = None
+    forwarded_messages_ids: Optional[Iterable[int]] = None
+    attachments: Optional[List[OutgoingAttachment]] = None
+
+
+@dataclass
 class AbstractIncomingMessage(ABC):
     peer_id: int
     id: Optional[int] = None
@@ -56,12 +66,26 @@ class AbstractIncomingMessage(ABC):
     async def get_forwarded_messages(self) -> List["AbstractIncomingMessage"]:
         pass
 
+    def make_answer(
+            self, text: Optional[str] = None,
+            reply_to_message_id: Optional[int] = None,
+            sticker_id: Optional[int] = None,
+            forwarded_messages_ids: Optional[Iterable[int]] = None,
+            attachments: Optional[List[OutgoingAttachment]] = None):
+        return OutgoingMessage(
+            peer_id=self.peer_id, text=text,
+            reply_to_message_id=reply_to_message_id, sticker_id=sticker_id,
+            forwarded_messages_ids=forwarded_messages_ids,
+            attachments=attachments
+        )
 
-@dataclass
-class OutgoingMessage:
-    peer_id: int
-    text: Optional[str] = None
-    reply_to_message_id: Optional[int] = None
-    sticker_id: Optional[int] = None
-    forwarded_messages_ids: Optional[Iterable[int]] = None
-    attachments: Optional[List[OutgoingAttachment]] = None
+    def make_reply(
+            self, text: Optional[str] = None, sticker_id: Optional[int] = None,
+            forwarded_messages_ids: Optional[Iterable[int]] = None,
+            attachments: Optional[List[OutgoingAttachment]] = None):
+        return OutgoingMessage(
+            peer_id=self.peer_id, text=text,
+            reply_to_message_id=self.id, sticker_id=sticker_id,
+            forwarded_messages_ids=forwarded_messages_ids,
+            attachments=attachments
+        )
