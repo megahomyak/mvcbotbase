@@ -66,8 +66,9 @@ class MVCBotBase:
         ]) if len(names) > 1 else ""
         arguments = [f"[{arg.name}]" for arg in arguments]
         return " ".join(filter(None, [
-            f"/{names[0]}", f"({additional_names})", *arguments,
-            f" - {description}" if description else ""
+            f"/{names[0]}",
+            f"({additional_names})" if additional_names else None, *arguments,
+            f"- {description}" if description else ""
         ]))
 
     def _make_full_help_message(self) -> str:
