@@ -108,18 +108,25 @@ class MVCBotBase:
         if handler:
             if isinstance(name_or_names, str):
                 name_or_names = [name_or_names]
+            if arguments:
+                arguments_regex = re.compile(
+                    self.command_arguments_separator.join(
+                        f"({argument.regex})" for argument in arguments
+                    )
+                )
+                converters = [argument.get_value for argument in arguments]
+            else:
+                arguments_regex = None
+                converters = None
             command_info = CommandInfo(
-                regex=re.compile(self.command_arguments_separator.join(
-                    f"({argument.regex})" for argument in arguments
-                )),
-                handler=handler,
-                converters=[argument.get_value for argument in arguments]
+                arguments_regex=arguments_regex, handler=handler,
+                converters=converters
             )
             for name in name_or_names:
                 self.trie.add(name, command_info)
             if include_in_help_message:
                 help_message = self.make_help_message_for_command(
-                    name_or_names, arguments, description
+                    name_or_names, arguments if arguments else [], description
                 )
                 if group_name:
                     self.command_groups.setdefault(group_name, []).append(
@@ -165,27 +172,32 @@ class MVCBotBase:
                     command_name_length, incoming_message
                 )
         else:
-            argument_texts = command_info.regex.fullmatch(arguments_str)
-            if argument_texts:
+            if command_info.arguments_regex:
+                argument_texts = command_info.arguments_regex.fullmatch(
+                    arguments_str
+                )
+                if not argument_texts:
+                    if self.bad_command_arguments_handler:
+                        await self.bad_command_arguments_handler(
+                            command_name_length, incoming_message, command_info
+                        )
+                    return
                 answer = await command_info.handler(incoming_message, *(
                     converter(argument_text)
                     for argument_text, converter in zip(
                         argument_texts.groups(), command_info.converters
                     )
                 ))
-                if isinstance(answer, OutgoingMessage):
-                    await social_network_provider.send_message(answer)
-                elif answer is not None:
-                    await social_network_provider.send_message(
-                        OutgoingMessage(
-                            peer_id=incoming_message.peer_id, text=str(answer)
-                        )
-                    )
             else:
-                if self.bad_command_arguments_handler:
-                    await self.bad_command_arguments_handler(
-                        command_name_length, incoming_message, command_info
+                answer = await command_info.handler(incoming_message)
+            if isinstance(answer, OutgoingMessage):
+                await social_network_provider.send_message(answer)
+            elif answer is not None:
+                await social_network_provider.send_message(
+                    OutgoingMessage(
+                        peer_id=incoming_message.peer_id, text=str(answer)
                     )
+                )
 
     def run(self, loop: Optional[asyncio.AbstractEventLoop] = None):
         if not loop:
