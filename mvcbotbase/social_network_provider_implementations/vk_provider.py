@@ -179,19 +179,45 @@ class VKProvider(SocialNetworkProvider):
                     )
 
     async def send_message(self, message: OutgoingMessage):
-        text_parts = (
-            message.text[i:i + SYMBOLS_PER_MESSAGE]
-            for i in range(0, len(message.text), SYMBOLS_PER_MESSAGE)
-        )
-        for part in text_parts:
-            # noinspection SpellCheckingInspection
-            await self._vk.call_method(
-                "messages.send",
-                {
-                    "peer_id": message.peer_id,
-                    "message": part,
-                    "random_id": random.randint(-1_000_000, 1_000_000),
-                    "disable_mentions": 1,
-                    "dont_parse_links": 1
-                }
+        # noinspection SpellCheckingInspection
+        params = {
+            "peer_id": message.peer_id,
+            "random_id": random.randint(-1_000_000, 1_000_000),
+            "disable_mentions": 1,
+            "dont_parse_links": 1
+        }
+        if message.text:
+            text_parts = (
+                message.text[i:i + SYMBOLS_PER_MESSAGE]
+                for i in range(0, len(message.text), SYMBOLS_PER_MESSAGE)
             )
+            current_message = None
+            messages_counter = 0
+            while True:
+                next_message = next(text_parts, None)
+                if current_message:
+                    if not next_message and message.forwarded_messages_ids:
+                        # This is the end
+                        params["forward_messages"] = ",".join(
+                            map(str, message.forwarded_messages_ids)
+                        )
+                    if messages_counter == 1 and message.answer_to_message_id:
+                        params["reply_to"] = message.answer_to_message_id
+                    params["message"] = current_message
+                    await self._vk.call_method("messages.send", params)
+                    del params["message"]
+                    for key_name in ("reply_to", "forward_messages"):
+                        try:
+                            del params[key_name]
+                        except KeyError:
+                            pass
+                    current_message = next_message
+                    messages_counter += 1
+        else:
+            if message.forwarded_messages_ids:
+                params["forward_messages"] = ",".join(
+                    map(str, message.forwarded_messages_ids)
+                )
+            if message.answer_to_message_id:
+                params["reply_to"] = message.answer_to_message_id
+            await self._vk.call_method("messages.send", params)
