@@ -205,14 +205,16 @@ class VKProvider(SocialNetworkProvider):
                         params["reply_to"] = message.reply_to_message_id
                     params["message"] = current_message
                     await self._vk.call_method("messages.send", params)
+                    if not next_message:
+                        break
                     del params["message"]
                     for key_name in ("reply_to", "forward_messages"):
                         try:
                             del params[key_name]
                         except KeyError:
                             pass
-                    current_message = next_message
-                    messages_counter += 1
+                current_message = next_message
+                messages_counter += 1
         else:
             if message.forwarded_messages_ids:
                 params["forward_messages"] = ",".join(
