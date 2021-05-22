@@ -202,6 +202,7 @@ class MVCBotBase:
     def run(self, loop: Optional[asyncio.AbstractEventLoop] = None):
         if not loop:
             loop = asyncio.get_event_loop()
+        self.update_help_message()
         loop.run_until_complete(asyncio.gather(
             *[
                 self._run_social_network_provider(social_network_provider)
