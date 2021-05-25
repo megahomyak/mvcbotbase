@@ -18,7 +18,15 @@ class Attachment:
     type: AttachmentType
 
 
+class FileAttachment(Attachment):
+    filename: str
+
+
 class ContentCantBeDownloadedError(Exception):
+    pass
+
+
+class AttachmentToUploadHasUnknownFileTypeError(Exception):
     pass
 
 
