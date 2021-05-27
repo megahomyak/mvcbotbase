@@ -18,10 +18,6 @@ class Attachment:
     type: AttachmentType
 
 
-class FileAttachment(Attachment):
-    filename: str
-
-
 class ContentCantBeDownloadedError(Exception):
     pass
 
@@ -51,6 +47,7 @@ class UndownloadableAttachment(AbstractIncomingAttachment):
 @dataclass
 class OutgoingAttachment(Attachment):
     file: BytesIO
+    filename: str = None
 
 
 @dataclass
@@ -65,6 +62,7 @@ class OutgoingMessage:
 
 @dataclass
 class AbstractIncomingMessage(ABC):
+    social_network_provider_id: int
     peer_id: int
     id: Optional[int] = None
     text: Optional[str] = None
