@@ -47,6 +47,10 @@ class UndownloadableAttachment(AbstractIncomingAttachment):
 @dataclass
 class OutgoingAttachment(Attachment):
     file: BytesIO
+
+
+@dataclass
+class OutgoingFileAttachment(OutgoingAttachment):
     filename: str = None
 
 
@@ -57,7 +61,7 @@ class OutgoingMessage:
     reply_to_message_id: Optional[int] = None
     sticker_id: Optional[int] = None
     forwarded_messages_ids: Optional[Iterable[int]] = None
-    attachments: Optional[List[OutgoingAttachment]] = None
+    attachments: Optional[List[OutgoingFileAttachment]] = None
 
 
 @dataclass
@@ -83,7 +87,7 @@ class AbstractIncomingMessage(ABC):
             reply_to_message_id: Optional[int] = None,
             sticker_id: Optional[int] = None,
             forwarded_messages_ids: Optional[Iterable[int]] = None,
-            attachments: Optional[List[OutgoingAttachment]] = None):
+            attachments: Optional[List[OutgoingFileAttachment]] = None):
         return OutgoingMessage(
             peer_id=self.peer_id, text=text,
             reply_to_message_id=reply_to_message_id, sticker_id=sticker_id,
@@ -94,7 +98,7 @@ class AbstractIncomingMessage(ABC):
     def make_reply(
             self, text: Optional[str] = None, sticker_id: Optional[int] = None,
             forwarded_messages_ids: Optional[Iterable[int]] = None,
-            attachments: Optional[List[OutgoingAttachment]] = None):
+            attachments: Optional[List[OutgoingFileAttachment]] = None):
         return OutgoingMessage(
             peer_id=self.peer_id, text=text,
             reply_to_message_id=self.id, sticker_id=sticker_id,
