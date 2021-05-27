@@ -135,6 +135,7 @@ class MVCBotBase:
                     )
                 else:
                     self.ungrouped_command_help_messages.append(help_message)
+            return handler
         else:
             return functools.partial(
                 self.add_command, name_or_names, arguments, description,
