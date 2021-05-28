@@ -23,6 +23,10 @@ class ContentCantBeDownloadedError(Exception):
 
 
 class AttachmentToUploadHasUnknownFileTypeError(Exception):
+    """
+    Should be raised when user tries to upload an attachment with
+    AttachmentType.OTHER
+    """
     pass
 
 
