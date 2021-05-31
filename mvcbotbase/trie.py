@@ -33,3 +33,17 @@ class Trie:
                 del dict_[key]
             else:
                 break
+
+
+class CaseFoldTrie(Trie):
+
+    superclass = super()
+
+    def add(self, key: str, value):
+        self.superclass.add(key.casefold(), value)
+
+    def __getitem__(self, key: str):
+        return self.superclass[key.casefold()]
+
+    def remove(self, key: str):
+        self.superclass.remove(key.casefold())
