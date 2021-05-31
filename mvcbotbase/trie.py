@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Hashable
 
 
 class Trie:
@@ -6,19 +6,19 @@ class Trie:
     def __init__(self):
         self.root = {}
 
-    def add(self, key: Iterable, value):
+    def add(self, key: Iterable[Hashable], value):
         root = self.root
         for symbol in key:
             root = root.setdefault(symbol, {})
         root["end"] = value
 
-    def __getitem__(self, key: Iterable):
+    def __getitem__(self, key: Iterable[Hashable]):
         root = self.root
         for symbol in key:
             root = root[symbol]
         return root["end"]
 
-    def remove(self, key: Iterable):
+    def remove(self, key: Iterable[Hashable]):
         root = self.root
         dicts_stack = []
         for symbol in key:
