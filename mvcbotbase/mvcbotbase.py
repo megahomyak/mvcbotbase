@@ -127,6 +127,10 @@ class MVCBotBase:
                 converters=converters
             )
             for name in name_or_names:
+                if self.command_arguments_separator in name:
+                    raise ValueError(
+                        f"\"{name}\" contains arguments separator!"
+                    )
                 self.trie.add(name, command_info)
             if include_in_help_message:
                 help_message = self.make_help_message_for_command(
