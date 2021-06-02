@@ -12,6 +12,7 @@ config = json.load(open("config.json"))
 mvc_bot_base = MVCBotBase(VKProvider(config["token"], config["group_id"]))
 
 
+# noinspection PyUnusedLocal
 @mvc_bot_base.add_command(
     "test", [WordArg("first arg name"), IntArg("second arg name")],
     "test description", "Test group"
@@ -31,6 +32,7 @@ async def test_reply(message):
     return message.make_reply("abc")
 
 
+# noinspection PyUnusedLocal
 @mvc_bot_base.add_command("help")
 async def get_help(message):
     return mvc_bot_base.help_message
