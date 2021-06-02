@@ -14,7 +14,8 @@ mvc_bot_base = MVCBotBase(VKProvider(config["token"], config["group_id"]))
 
 # noinspection PyUnusedLocal
 @mvc_bot_base.add_command(
-    "test", [WordArg("first arg name"), IntArg("second arg name")],
+    ["test", "test_alias"],
+    [WordArg("first arg name"), IntArg("second arg name")],
     "test description", "Test group"
 )
 async def test_handler(

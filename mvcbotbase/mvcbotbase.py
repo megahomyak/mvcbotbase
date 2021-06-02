@@ -1,7 +1,10 @@
 import asyncio
 import functools
 import re
-from typing import Callable, Awaitable, Optional, List, Dict, Union, Iterable
+from typing import (
+    Callable, Awaitable, Optional, List, Dict, Union, Iterable,
+    Sequence
+)
 
 from mvcbotbase import helpers
 from mvcbotbase.classes_for_command_arguments import BaseArg
@@ -98,9 +101,9 @@ class MVCBotBase:
         )
 
     def add_command(
-            self, name_or_names: Union[str, List[str]],
-            arguments: List[BaseArg] = None, description=None, group_name=None,
-            include_in_help_message=True, handler=None):
+            self, name_or_names: Union[str, Sequence[str]],
+            arguments: Sequence[BaseArg] = None, description=None,
+            group_name=None, include_in_help_message=True, handler=None):
         """
         Works as a decorator if handler isn't specified
 
