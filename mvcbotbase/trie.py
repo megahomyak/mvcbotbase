@@ -37,13 +37,11 @@ class Trie:
 
 class CaseFoldTrie(Trie):
 
-    superclass = super()
-
     def add(self, key: str, value):
-        self.superclass.add(key.casefold(), value)
+        Trie.add(self, key.casefold(), value)
 
     def __getitem__(self, key: str):
-        return self.superclass[key.casefold()]
+        return Trie.__getitem__(self, key.casefold())
 
     def remove(self, key: str):
-        self.superclass.remove(key.casefold())
+        Trie.remove(self, key.casefold())
