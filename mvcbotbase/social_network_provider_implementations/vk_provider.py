@@ -30,11 +30,10 @@ class OutgoingVKMusicAttachment(OutgoingAttachment):
 class VKProvider(SocialNetworkProvider):
 
     def __init__(
-            self, social_network_provider_id: int, token: str,
+            self, token: str,
             group_id: int = None):
         self._token = token
         self._group_id = group_id
-        self.social_network_provider_id = social_network_provider_id
         self._vk = None
         self.aiohttp_session = None
 
@@ -101,8 +100,6 @@ class VKProvider(SocialNetworkProvider):
         else:
             raise NotImplementedError
 
-    # noinspection PyShadowingNames
-    # Just for one lambda
     async def get_messages(self) -> AsyncGenerator[
             helpers.IncomingVKMessage, None
     ]:
@@ -113,7 +110,7 @@ class VKProvider(SocialNetworkProvider):
             async for event in vk.listen():
                 if event["type"] == "message_new":
                     yield helpers.get_message_from_message_info(
-                        self.social_network_provider_id,
+                        self.__class__,
                         event["object"]["message"], aiohttp_session
                     )
 

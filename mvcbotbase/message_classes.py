@@ -70,7 +70,7 @@ class OutgoingMessage:
 
 @dataclass
 class AbstractIncomingMessage(ABC):
-    social_network_provider_id: int
+    social_network_provider: type
     peer_id: int
     id: Optional[int] = None
     text: Optional[str] = None

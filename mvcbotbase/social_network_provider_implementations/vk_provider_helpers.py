@@ -117,7 +117,7 @@ def get_attachments_from_message_info(
 
 
 def get_message_from_message_info(
-        social_network_provider_id: int,
+        social_network_provider: type,
         message_info: dict, aiohttp_session) -> IncomingVKMessage:
     reply_message = message_info.get("reply_message")
     if reply_message:
@@ -125,7 +125,7 @@ def get_message_from_message_info(
             message_info, aiohttp_session
         )
         reply_message = IncomingVKMessage(
-            social_network_provider_id=social_network_provider_id,
+            social_network_provider=social_network_provider,
             id=reply_message["id"], text=reply_message["text"],
             peer_id=reply_message["peer_id"],
             sticker_id=sticker_id,
@@ -134,7 +134,7 @@ def get_message_from_message_info(
         )
     forwarded_messages = [
         get_message_from_message_info(
-            social_network_provider_id, forwarded_message_info, aiohttp_session
+            social_network_provider, forwarded_message_info, aiohttp_session
         )
         for forwarded_message_info in message_info["fwd_messages"]
     ]
@@ -142,7 +142,7 @@ def get_message_from_message_info(
         message_info, aiohttp_session
     )
     return IncomingVKMessage(
-        social_network_provider_id=social_network_provider_id,
+        social_network_provider=social_network_provider,
         id=message_info.get("id"), text=message_info["text"],
         sender_id=message_info["from_id"],
         peer_id=message_info["peer_id"], sticker_id=sticker_id,
