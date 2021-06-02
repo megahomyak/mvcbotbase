@@ -9,7 +9,7 @@ from mvcbotbase.social_network_provider_implementations.vk_provider import (
 
 config = json.load(open("config.json"))
 
-mvc_bot_base = MVCBotBase(VKProvider(config["token"], config["group_id"]))
+mvc_bot_base = MVCBotBase(1, VKProvider(config["token"], config["group_id"]))
 
 
 # noinspection PyUnusedLocal
