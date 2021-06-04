@@ -11,7 +11,6 @@ from mvcbotbase.classes_for_command_arguments import BaseArg
 from mvcbotbase.command_info import CommandInfo
 from mvcbotbase.message_classes import AbstractIncomingMessage, OutgoingMessage
 from mvcbotbase.social_network_provider import SocialNetworkProvider
-from mvcbotbase.trie import CaseFoldTrie
 
 CommandsGroupName = str
 SingleCommandHelpMessage = str
@@ -43,7 +42,7 @@ class MVCBotBase:
         if isinstance(social_network_providers, SocialNetworkProvider):
             social_network_providers = [social_network_providers]
         self.social_network_providers = social_network_providers
-        self.trie = CaseFoldTrie()
+        self.commands = {}
         self.command_arguments_separator = command_arguments_separator
         self.command_arguments_separator_length = len(
             command_arguments_separator
@@ -131,7 +130,7 @@ class MVCBotBase:
                     raise ValueError(
                         f"\"{name}\" contains arguments separator!"
                     )
-                self.trie.add(name, command_info)
+                self.commands[name] = command_info
             if include_in_help_message:
                 help_message = self.make_help_message_for_command(
                     name_or_names, arguments if arguments else [], description
@@ -152,10 +151,10 @@ class MVCBotBase:
     def remove_command(
             self, name_or_names: Union[str, Iterable[str]]):
         if isinstance(name_or_names, str):
-            self.trie.remove(name_or_names)
+            del self.commands[name_or_names]
         else:
             for name in name_or_names:
-                self.trie.remove(name)
+                del self.commands[name]
 
     def update_help_message(self) -> None:
         self.help_message = self._make_full_help_message()
@@ -174,7 +173,7 @@ class MVCBotBase:
                 command_name_length + self.command_arguments_separator_length:
             ]
         try:
-            command_info = self.trie[command_name]
+            command_info = self.commands[command_name]
         except KeyError:
             if self.unknown_command_handler:
                 await self.unknown_command_handler(
