@@ -26,7 +26,7 @@ class MVCBotBase:
 
     def __init__(
             self, social_network_providers: (
-                Union[List[SocialNetworkProvider], SocialNetworkProvider]
+                Union[Sequence[SocialNetworkProvider], SocialNetworkProvider]
             ),
             command_arguments_separator=" ",
             unknown_command_handler: (
@@ -58,7 +58,7 @@ class MVCBotBase:
             Dict[CommandsGroupName, List[SingleCommandHelpMessage]]
         ) = {}
         self.ungrouped_command_help_messages: (
-            List[SingleCommandHelpMessage]
+            Sequence[SingleCommandHelpMessage]
         ) = []
         self.help_message = None
         self.help_message_title = help_message_title
