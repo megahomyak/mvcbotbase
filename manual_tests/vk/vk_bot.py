@@ -23,7 +23,7 @@ async def test_handler(
     return "Hello"
 
 
-@mvc_bot_base.add_command("test2")
+@mvc_bot_base.add_command("test")
 async def test_forwarded_messages(message):
     return message.make_answer(forwarded_messages_ids=[message.id])
 

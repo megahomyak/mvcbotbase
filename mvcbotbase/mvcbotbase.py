@@ -15,6 +15,7 @@ from mvcbotbase.social_network_provider import SocialNetworkProvider
 
 CommandsGroupName = str
 SingleCommandHelpMessage = str
+CommandName = str
 
 
 class MVCBotBase:
@@ -29,11 +30,13 @@ class MVCBotBase:
             ),
             command_arguments_separator=" ",
             unknown_command_handler: (
-                Optional[Callable[[int, AbstractIncomingMessage], Awaitable]]
+                Optional[Callable[
+                    [CommandName, AbstractIncomingMessage], Awaitable
+                ]]
             ) = None,
             bad_command_arguments_handler: (
                 Optional[Callable[
-                    [int, AbstractIncomingMessage, CommandInfo], Awaitable
+                    [CommandName, AbstractIncomingMessage], Awaitable
                 ]]
             ) = None,
             handler_errors_handler: (
@@ -43,7 +46,7 @@ class MVCBotBase:
         if isinstance(social_network_providers, SocialNetworkProvider):
             social_network_providers = [social_network_providers]
         self.social_network_providers = social_network_providers
-        self.commands = CaseFoldDict()
+        self.commands_info = CaseFoldDict()
         self.command_arguments_separator = command_arguments_separator
         self.command_arguments_separator_length = len(
             command_arguments_separator
@@ -131,7 +134,7 @@ class MVCBotBase:
                     raise ValueError(
                         f"\"{name}\" contains arguments separator!"
                     )
-                self.commands[name] = command_info
+                self.commands_info.setdefault(name, []).append(command_info)
             if include_in_help_message:
                 help_message = self.make_help_message_for_command(
                     name_or_names, arguments if arguments else [], description
@@ -152,10 +155,10 @@ class MVCBotBase:
     def remove_command(
             self, name_or_names: Union[str, Iterable[str]]):
         if isinstance(name_or_names, str):
-            del self.commands[name_or_names]
+            del self.commands_info[name_or_names]
         else:
             for name in name_or_names:
-                del self.commands[name]
+                del self.commands_info[name]
 
     def update_help_message(self) -> None:
         self.help_message = self._make_full_help_message()
@@ -174,38 +177,41 @@ class MVCBotBase:
                 command_name_length + self.command_arguments_separator_length:
             ]
         try:
-            command_info = self.commands[command_name]
+            commands_info = self.commands_info[command_name]
         except KeyError:
             if self.unknown_command_handler:
                 await self.unknown_command_handler(
-                    command_name_length, incoming_message
+                    command_name, incoming_message
                 )
         else:
-            if command_info.arguments_regex:
-                argument_texts = command_info.arguments_regex.fullmatch(
-                    arguments_str
-                )
-                if not argument_texts:
-                    if self.bad_command_arguments_handler:
-                        await self.bad_command_arguments_handler(
-                            command_name_length, incoming_message, command_info
+            for command_info in commands_info:
+                if command_info.arguments_regex:
+                    argument_texts = command_info.arguments_regex.fullmatch(
+                        arguments_str
+                    )
+                    if not argument_texts:
+                        continue
+                    answer = await command_info.handler(incoming_message, *(
+                        converter(argument_text)
+                        for argument_text, converter in zip(
+                            argument_texts.groups(), command_info.converters
                         )
-                    return
-                answer = await command_info.handler(incoming_message, *(
-                    converter(argument_text)
-                    for argument_text, converter in zip(
-                        argument_texts.groups(), command_info.converters
-                    )
-                ))
-            else:
-                answer = await command_info.handler(incoming_message)
-            if isinstance(answer, OutgoingMessage):
-                await social_network_provider.send_message(answer)
-            elif answer is not None:
-                await social_network_provider.send_message(
-                    OutgoingMessage(
+                    ))
+                else:
+                    if command_name_length == -1:
+                        answer = await command_info.handler(incoming_message)
+                    else:
+                        continue
+                if isinstance(answer, OutgoingMessage):
+                    await social_network_provider.send_message(answer)
+                elif answer is not None:
+                    await social_network_provider.send_message(OutgoingMessage(
                         peer_id=incoming_message.peer_id, text=str(answer)
-                    )
+                    ))
+                return
+            if self.bad_command_arguments_handler:
+                await self.bad_command_arguments_handler(
+                    command_name, incoming_message
                 )
 
     def run(self, loop: Optional[asyncio.AbstractEventLoop] = None):
