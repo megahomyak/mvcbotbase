@@ -7,6 +7,7 @@ from typing import (
 )
 
 from mvcbotbase import helpers
+from mvcbotbase.case_fold_dict import CaseFoldDict
 from mvcbotbase.classes_for_command_arguments import BaseArg
 from mvcbotbase.command_info import CommandInfo
 from mvcbotbase.message_classes import AbstractIncomingMessage, OutgoingMessage
@@ -42,7 +43,7 @@ class MVCBotBase:
         if isinstance(social_network_providers, SocialNetworkProvider):
             social_network_providers = [social_network_providers]
         self.social_network_providers = social_network_providers
-        self.commands = {}
+        self.commands = CaseFoldDict()
         self.command_arguments_separator = command_arguments_separator
         self.command_arguments_separator_length = len(
             command_arguments_separator
