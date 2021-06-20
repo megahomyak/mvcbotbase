@@ -1,3 +1,4 @@
+from mvcbotbase import social_network_provider_implementations
 from mvcbotbase.classes_for_command_arguments import (
     BaseArg, IntArg, WordArg, StringArg, Sequence
 )
