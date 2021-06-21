@@ -1,4 +1,3 @@
-from mvcbotbase import social_network_provider_implementations, command_info
 from mvcbotbase.classes_for_command_arguments import (
     BaseArg, IntArg, WordArg, StringArg, Sequence
 )
@@ -10,6 +9,7 @@ from mvcbotbase.message_classes import (
 )
 from mvcbotbase.mvcbotbase import MVCBotBase
 from mvcbotbase.social_network_provider import SocialNetworkProvider
+from mvcbotbase import social_network_provider_implementations, command_info
 
 __all__ = [
     "MVCBotBase",
