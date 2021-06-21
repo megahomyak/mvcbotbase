@@ -10,9 +10,12 @@ from typing import AsyncGenerator, Union
 import aiohttp
 from simple_avk import SimpleAVK
 
-from mvcbotbase import (
-    SocialNetworkProvider, OutgoingMessage, AttachmentType, OutgoingAttachment,
+from mvcbotbase.message_classes import (
+    AttachmentType, OutgoingAttachment,
     OutgoingFileAttachment, AttachmentToUploadHasUnknownFileTypeError
+)
+from mvcbotbase.social_network_provider import (
+    SocialNetworkProvider, OutgoingMessage
 )
 from mvcbotbase.social_network_provider_implementations import (
     vk_provider_helpers as helpers

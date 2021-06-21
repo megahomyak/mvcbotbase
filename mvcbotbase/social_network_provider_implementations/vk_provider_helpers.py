@@ -7,9 +7,9 @@ from typing import Optional, List, Tuple
 
 import aiohttp
 
-from mvcbotbase import (
-    AbstractIncomingAttachment, UndownloadableAttachment,
-    AttachmentType, AbstractIncomingMessage
+from mvcbotbase.message_classes import (
+    AbstractIncomingAttachment, UndownloadableAttachment, AttachmentType,
+    AbstractIncomingMessage
 )
 
 DEFAULT_CHUNK_SIZE = 1024
